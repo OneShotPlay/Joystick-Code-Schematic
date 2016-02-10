@@ -1,0 +1,85 @@
+
+// by Matthew Heironimus
+// 2015-11-20          
+//Adapted by Pierre SEGURA
+//2016/02/10   
+// I'm not an expert, but I'm learning code, if you find error or have any questions , please email me at pierresegura@hotmail.fr
+//--------------------------------------------------------------------
+
+#include <Joystick.h>
+const bool testAutoSendMode = true;
+int A0M = 0;
+int A0M2 = 0;
+int A1M = 0;
+int A1M2 = 0;
+int A2M = 0;
+int A2M2 = 0;
+int A3M = 0;
+int A3M2 = 0;
+void setup() {
+   Serial1.begin(9600);
+  pinMode(5, INPUT_PULLUP);// We will used that first numer later !
+  pinMode(6, INPUT_PULLUP);
+  pinMode(7, INPUT_PULLUP);
+  pinMode(8, INPUT_PULLUP);
+  pinMode(9, INPUT_PULLUP);  
+  pinMode(10, INPUT_PULLUP); 
+  pinMode(11, INPUT_PULLUP); 
+  pinMode(12, INPUT_PULLUP); 
+  pinMode(A0, INPUT);
+  pinMode(A1, INPUT);
+  pinMode(A2, INPUT);
+  pinMode(A3, INPUT);
+Joystick.setThrottle(0);
+Joystick.setZAxis(0);
+Joystick.setXAxis(0);
+Joystick.setYAxis(0);
+
+  Joystick.begin();
+}
+
+
+const int pinToButtonMap = 5; // The "5" corresponf to the first pin named before 
+
+
+int lastButtonState[8] = {0,0,0,0,0,0,0,0};
+
+void loop() {
+
+  // Read pin values
+  for (int index = 0; index < 8; index++)
+  {
+    int currentButtonState = !digitalRead(index + pinToButtonMap);
+    if (currentButtonState != lastButtonState[index])
+    {
+      Joystick.setButton(index, currentButtonState);
+      lastButtonState[index] = currentButtonState;
+    }
+  }
+  {
+    A0M = analogRead(A0);
+    A0M = A0M*1;          // This line was created to adjust the value frome the potentiometer to the PC
+    A0M2 = map(A0M, 114, 996, -125, 125);   // I then realized that i needed that fonction MAP were i just marked the exrpem position of my potar
+    Joystick.setXAxis(A0M2);
+    A1M = analogRead(A1);
+    A1M = A1M*1;
+    A1M2 = map(A1M, 90, 983, -125, 125);
+    Joystick.setZAxis(A1M2);
+    A2M = analogRead(A2);
+    A2M = A2M*1;
+    A2M2 = map(A2M, 40, 940, 0, 240);
+    Joystick.setThrottle(A2M2);
+    A3M = analogRead(A3);
+    A3M = A3M*1;
+    A3M2 = map(A3M, 79, 907, -122, 122);
+    Joystick.setYAxis(A3M2);
+    Serial.println(A2M); // This line is made to monitor the value, to check if everything i write. 
+
+    if (testAutoSendMode == false) // I stil don't know what this line is made for, so I let it there. 
+    {
+      Joystick.sendState();
+    }
+  }
+
+  delay(50);
+}
